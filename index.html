@@ -3,23 +3,214 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D FPS Platformer Game</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Tactical Assault - 3D Shooter</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="loading">Loading 3D FPS Game...</div>
-    <div id="canvas-container"></div>
-    <div id="ui">
-        <div id="hud">
-            <div id="info">Click to lock mouse, WASD to move</div>
+    <canvas id="gameCanvas"></canvas>
+    
+    <!-- HUD Elements -->
+    <div id="hud" class="hud">
+        <!-- Crosshair -->
+        <div id="crosshair" class="crosshair">
+            <div class="crosshair-h"></div>
+            <div class="crosshair-v"></div>
+        </div>
+        
+        <!-- Health/Armor Bar -->
+        <div id="healthPanel" class="health-panel">
+            <div class="health-stat">
+                <div class="stat-label">HEALTH</div>
+                <div class="stat-bar">
+                    <div id="healthBar" class="health-bar-fill"></div>
+                </div>
+                <div id="healthText" class="stat-value">100/100</div>
+            </div>
+            <div class="health-stat">
+                <div class="stat-label">ARMOR</div>
+                <div class="stat-bar">
+                    <div id="armorBar" class="armor-bar-fill"></div>
+                </div>
+                <div id="armorText" class="stat-value">50/50</div>
+            </div>
+        </div>
+        
+        <!-- Ammo Display -->
+        <div id="ammoPanel" class="ammo-panel">
+            <div class="ammo-display">
+                <div id="currentAmmo" class="ammo-current">30</div>
+                <div class="ammo-separator">/</div>
+                <div id="maxAmmo" class="ammo-max">240</div>
+            </div>
+            <div id="reloadBar" class="reload-bar hidden">
+                <div id="reloadFill" class="reload-fill"></div>
+            </div>
+        </div>
+        
+        <!-- Weapon Info -->
+        <div id="weaponPanel" class="weapon-panel">
+            <div id="weaponName" class="weapon-name">AR-15 ASSAULT RIFLE</div>
+        </div>
+        
+        <!-- Minimap -->
+        <div id="minimap" class="minimap">
+            <canvas id="minimapCanvas" width="200" height="200"></canvas>
+        </div>
+        
+        <!-- Objective Display -->
+        <div id="objectivePanel" class="objective-panel">
+            <div id="objectiveTitle" class="objective-title">OBJECTIVE</div>
+            <div id="objectiveText" class="objective-text">Eliminate all targets</div>
+        </div>
+        
+        <!-- Score Display -->
+        <div id="scorePanel" class="score-panel">
+            <div class="score-item">
+                <span class="score-label">KILLS:</span>
+                <span id="killCount" class="score-value">0</span>
+            </div>
+            <div class="score-item">
+                <span class="score-label">WAVE:</span>
+                <span id="waveCount" class="score-value">1</span>
+            </div>
+        </div>
+        
+        <!-- Notifications -->
+        <div id="notifications" class="notifications"></div>
+    </div>
+    
+    <!-- Menus -->
+    <div id="mainMenu" class="menu-container">
+        <div class="menu-content">
+            <div class="menu-title">TACTICAL ASSAULT</div>
+            <div class="menu-subtitle">3D Tactical Shooter</div>
+            <button id="playBtn" class="menu-button">PLAY GAME</button>
+            <button id="settingsBtn" class="menu-button">SETTINGS</button>
+            <button id="instructionsBtn" class="menu-button">INSTRUCTIONS</button>
+            <div class="menu-footer">Press ESC to return to menu</div>
         </div>
     </div>
     
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="js/FPSController.js"></script>
-    <script src="js/GunSystem.js"></script>
-    <script src="js/InventorySystem.js"></script>
-    <script src="js/GameUI.js"></script>
-    <script src="js/game.js"></script>
+    <div id="pauseMenu" class="menu-container hidden">
+        <div class="menu-content">
+            <div class="menu-title">PAUSED</div>
+            <button id="resumeBtn" class="menu-button">RESUME GAME</button>
+            <button id="pauseSettingsBtn" class="menu-button">SETTINGS</button>
+            <button id="mainMenuBtn" class="menu-button">MAIN MENU</button>
+            <div class="menu-footer">Press ESC to resume</div>
+        </div>
+    </div>
+    
+    <div id="gameOverMenu" class="menu-container hidden">
+        <div class="menu-content">
+            <div class="menu-title">MISSION FAILED</div>
+            <div id="gameOverStats" class="game-over-stats">
+                <div class="stat-row">
+                    <span>Kills:</span>
+                    <span id="finalKills">0</span>
+                </div>
+                <div class="stat-row">
+                    <span>Waves:</span>
+                    <span id="finalWaves">0</span>
+                </div>
+                <div class="stat-row">
+                    <span>Score:</span>
+                    <span id="finalScore">0</span>
+                </div>
+            </div>
+            <button id="retryBtn" class="menu-button">RETRY MISSION</button>
+            <button id="quitBtn" class="menu-button">MAIN MENU</button>
+        </div>
+    </div>
+    
+    <div id="settingsMenu" class="menu-container hidden">
+        <div class="menu-content">
+            <div class="menu-title">SETTINGS</div>
+            <div class="settings-group">
+                <label>Master Volume</label>
+                <input id="masterVolume" type="range" min="0" max="100" value="70" class="slider">
+                <span id="volumeValue">70%</span>
+            </div>
+            <div class="settings-group">
+                <label>Mouse Sensitivity</label>
+                <input id="mouseSensitivity" type="range" min="1" max="10" value="5" class="slider">
+                <span id="sensitivityValue">5</span>
+            </div>
+            <div class="settings-group">
+                <label>
+                    <input type="checkbox" id="motionBlur" checked>
+                    Motion Blur
+                </label>
+            </div>
+            <div class="settings-group">
+                <label>
+                    <input type="checkbox" id="screenShake" checked>
+                    Screen Shake
+                </label>
+            </div>
+            <div class="settings-group">
+                <label>
+                    <input type="checkbox" id="muzzleFlash" checked>
+                    Muzzle Flash
+                </label>
+            </div>
+            <div class="settings-group">
+                <label>Shadow Quality</label>
+                <select id="shadowQuality" class="select-input">
+                    <option value="low">Low</option>
+                    <option value="medium" selected>Medium</option>
+                    <option value="high">High</option>
+                </select>
+            </div>
+            <button id="backBtn" class="menu-button">BACK</button>
+        </div>
+    </div>
+    
+    <div id="instructionsMenu" class="menu-container hidden">
+        <div class="menu-content instructions-content">
+            <div class="menu-title">HOW TO PLAY</div>
+            <div class="instructions-text">
+                <h3>CONTROLS</h3>
+                <p><strong>W/A/S/D</strong> - Move</p>
+                <p><strong>SPACE</strong> - Jump</p>
+                <p><strong>SHIFT</strong> - Sprint</p>
+                <p><strong>CTRL</strong> - Crouch</p>
+                <p><strong>LEFT MOUSE</strong> - Fire</p>
+                <p><strong>RIGHT MOUSE</strong> - Aim Down Sights</p>
+                <p><strong>R</strong> - Reload</p>
+                <p><strong>MOUSE</strong> - Look Around</p>
+                <p><strong>ESC</strong> - Pause</p>
+                
+                <h3>GAMEPLAY</h3>
+                <p>Survive enemy waves and eliminate all targets. Manage your ammo and health carefully.</p>
+                <p>Enemies patrol the map and will engage when they spot you. Take cover and use the environment to your advantage.</p>
+                <p>Complete objectives to progress through waves. Each wave gets progressively harder.</p>
+                
+                <h3>WEAPONS & ITEMS</h3>
+                <p>Collect ammo pickups and armor to stay in the fight. Your armor absorbs damage first.</p>
+            </div>
+            <button id="backInstructionsBtn" class="menu-button">BACK</button>
+        </div>
+    </div>
+    
+    <!-- Loading Screen -->
+    <div id="loadingScreen" class="loading-screen">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <div class="loading-text">INITIALIZING TACTICAL SYSTEM...</div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="libs/three.min.js"></script>
+    <script src="src/utils.js"></script>
+    <script src="src/audioManager.js"></script>
+    <script src="src/particleSystem.js"></script>
+    <script src="src/enemy.js"></script>
+    <script src="src/player.js"></script>
+    <script src="src/map.js"></script>
+    <script src="src/gameManager.js"></script>
+    <script src="src/ui.js"></script>
+    <script src="game.js"></script>
 </body>
 </html>
