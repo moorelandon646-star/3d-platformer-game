@@ -3,17 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D Platformer Game</title>
+    <title>3D FPS Platformer Game</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+    <div id="loading">Loading 3D FPS Game...</div>
     <div id="canvas-container"></div>
     <div id="ui">
         <div id="hud">
-            <div id="info">Use WASD to move, SPACE to jump</div>
+            <div id="info">Click to lock mouse, WASD to move</div>
         </div>
     </div>
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="js/main.js"></script>
+    <script src="js/FPSController.js"></script>
+    <script src="js/GunSystem.js"></script>
+    <script src="js/InventorySystem.js"></script>
+    <script src="js/GameUI.js"></script>
+    <script src="js/game.js"></script>
 </body>
 </html>
